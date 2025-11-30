@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"restapi/todo"
-	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -31,21 +30,15 @@ func (h *HTTPHandlers) HandleCreateTask(w http.ResponseWriter, r *http.Request) 
 	}
 
 	if err := taskDTO.ValidateForCreate(); err != nil {
-		errDTO := ErrorTDO {
-			Message: err.Error(),
-			Time:	 time.Now(),
-		}
+		errDTO := NewErrorDTOFromError(err)
 
 		http.Error(w, errDTO.ToString(), http.StatusBadRequest)
-		return 
+		return
 	}
 
 	todoTask := todo.NewTask(taskDTO.Title, taskDTO.Description)
 	if err := h.todoList.AddTask(todoTask); err != nil {
-		errDTO := ErrorTDO{
-			Message: err.Error(),
-			Time:    time.Now(),
-		}
+		errDTO := NewErrorDTOFromError(err)		
 
 		if errors.Is(err, todo.ErrTaskAlreadyExists) {
 			http.Error(w, errDTO.ToString(), http.StatusConflict)
@@ -73,10 +66,7 @@ func (h *HTTPHandlers) HandleGetTask(w http.ResponseWriter, r *http.Request) {
 
 	task, err := h.todoList.GetTask(title)
 	if err != nil {
-		errDTO := ErrorTDO{
-			Message: err.Error(),
-			Time:    time.Now(), 
-		}
+		errDTO := NewErrorDTOFromError(err)
 		if errors.Is(err, todo.ErrTaskNotFound) {
 			http.Error(w, errDTO.ToString(), http.StatusNotFound)
 		} else {
@@ -144,7 +134,7 @@ func (h *HTTPHandlers) HandleCompleteTask(w http.ResponseWriter, r *http.Request
 	if completeDTO.Complete {
 		changedTask, err = h.todoList.CompleteTask(title)
 	} else {
-		changedTask, err = h.todoList.CompleteTask(title)
+		changedTask, err = h.todoList.UncompleteTask(title)
 	}
 
 	if err != nil {

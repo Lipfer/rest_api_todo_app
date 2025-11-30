@@ -27,19 +27,19 @@ func (t TaskDTO) ValidateForCreate() error {
 	return nil
 }
 
-type ErrorTDO struct {
+type ErrorDTO struct {
 	Message	string
 	Time	time.Time
 }
 
-func NewErrorDTOFromError(err error) ErrorTDO {
-	return  ErrorTDO{
+func NewErrorDTOFromError(err error) ErrorDTO {
+	return  ErrorDTO{
 		Message: err.Error(),
 		Time: time.Now(),
 	}
 }
 
-func (e ErrorTDO) ToString() string {
+func (e ErrorDTO) ToString() string {
 	b, err := json.MarshalIndent(e, "", "    ")
 	if err != nil {
 		panic(err)
